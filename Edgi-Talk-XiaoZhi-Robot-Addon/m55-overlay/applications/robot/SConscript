@@ -1,0 +1,5 @@
+from building import *
+
+cwd = GetCurrentDir()
+group = DefineGroup('Robot', Glob('*.c'), depend=['BSP_USING_ROBOT'], CPPPATH=[cwd])
+Return('group')

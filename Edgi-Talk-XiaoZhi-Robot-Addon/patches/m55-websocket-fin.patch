@@ -1,0 +1,15 @@
+diff --git a/rt-thread/components/net/lwip/lwip-2.1.2/src/apps/websocket/websocket_client.c b/rt-thread/components/net/lwip/lwip-2.1.2/src/apps/websocket/websocket_client.c
+--- a/rt-thread/components/net/lwip/lwip-2.1.2/src/apps/websocket/websocket_client.c
++++ b/rt-thread/components/net/lwip/lwip-2.1.2/src/apps/websocket/websocket_client.c
+@@ -1039,8 +1039,9 @@ wsock_write(struct websocket *ws, const void *buf, int buflen, uint8_t msgtype
+     else if (buflen <= WSLEN_BIG)
+     {
+         hdrlen += WSHDRLEN_EXT16BITS;
+-        if (buflen < WSMSG_MAXSIZE)
+-            hdr[0] |= WSHDRBITS_FIN;
++        /* This function sends one complete frame, never continuation frames.
++         * TCP segmentation does not imply WebSocket message fragmentation. */
++        hdr[0] |= WSHDRBITS_FIN;
+         hdr[1] |= WSHDRBITS_PAYLOAD_LEN_EXT16;
+         uint16_t paylen = htons(buflen);
+         memcpy(&hdr[WSHDRLEN_MIN], ((char *) &paylen), 2);

@@ -1,0 +1,122 @@
+diff --git a/rtconfig.h b/rtconfig.h
+--- a/rtconfig.h
++++ b/rtconfig.h
+@@ -51,9 +51,9 @@
+ /* Kernel Device Object */
+ 
+ #define RT_USING_DEVICE
+-#define RT_USING_CONSOLE
++/* Robot UART5 ownership: RT_USING_CONSOLE disabled on M33. */
+-#define RT_CONSOLEBUF_SIZE 1024
++/* Robot UART5 ownership: RT_CONSOLEBUF_SIZE disabled on M33. */
+-#define RT_CONSOLE_DEVICE_NAME "uart5"
++/* Robot UART5 ownership: RT_CONSOLE_DEVICE_NAME disabled on M33. */
+ /* end of Kernel Device Object */
+ #define RT_VER_NUM 0x50002
+ /* end of RT-Thread Kernel */
+@@ -64,20 +64,20 @@
+ #define RT_USING_USER_MAIN
+ #define RT_MAIN_THREAD_STACK_SIZE 2048
+ #define RT_MAIN_THREAD_PRIORITY 10
+-#define RT_USING_MSH
++/* Robot UART5 ownership: RT_USING_MSH disabled on M33. */
+-#define RT_USING_FINSH
++/* Robot UART5 ownership: RT_USING_FINSH disabled on M33. */
+-#define FINSH_USING_MSH
++/* Robot UART5 ownership: FINSH_USING_MSH disabled on M33. */
+-#define FINSH_THREAD_NAME "tshell"
++/* Robot UART5 ownership: FINSH_THREAD_NAME disabled on M33. */
+-#define FINSH_THREAD_PRIORITY 20
++/* Robot UART5 ownership: FINSH_THREAD_PRIORITY disabled on M33. */
+-#define FINSH_THREAD_STACK_SIZE 4096
++/* Robot UART5 ownership: FINSH_THREAD_STACK_SIZE disabled on M33. */
+-#define FINSH_USING_HISTORY
++/* Robot UART5 ownership: FINSH_USING_HISTORY disabled on M33. */
+-#define FINSH_HISTORY_LINES 5
++/* Robot UART5 ownership: FINSH_HISTORY_LINES disabled on M33. */
+-#define FINSH_USING_SYMTAB
++/* Robot UART5 ownership: FINSH_USING_SYMTAB disabled on M33. */
+-#define FINSH_CMD_SIZE 80
++/* Robot UART5 ownership: FINSH_CMD_SIZE disabled on M33. */
+-#define MSH_USING_BUILT_IN_COMMANDS
++/* Robot UART5 ownership: MSH_USING_BUILT_IN_COMMANDS disabled on M33. */
+-#define FINSH_USING_DESCRIPTION
++/* Robot UART5 ownership: FINSH_USING_DESCRIPTION disabled on M33. */
+-#define FINSH_ARG_MAX 10
++/* Robot UART5 ownership: FINSH_ARG_MAX disabled on M33. */
+-#define FINSH_USING_OPTION_COMPLETION
++/* Robot UART5 ownership: FINSH_USING_OPTION_COMPLETION disabled on M33. */
+ 
+ /* DFS: device virtual file system */
+ 
+@@ -399,7 +399,7 @@
+ #define BSP_USING_IPC
+ #define BSP_USING_UART
+ #define BSP_USING_UART2
+-#define BSP_USING_UART5
++/* Robot UART5 ownership: BSP_USING_UART5 disabled on M33. */
+ /* end of On-chip Peripheral Drivers */
+ /* end of Hardware Drivers Config */
+ 
+diff --git a/.config b/.config
+--- a/.config
++++ b/.config
+@@ -77,9 +77,9 @@
+ # CONFIG_RT_USING_DEVICE_OPS is not set
+ # CONFIG_RT_USING_DM is not set
+ # CONFIG_RT_USING_INTERRUPT_INFO is not set
+-CONFIG_RT_USING_CONSOLE=y
++# CONFIG_RT_USING_CONSOLE is not set
+-CONFIG_RT_CONSOLEBUF_SIZE=1024
++# CONFIG_RT_CONSOLEBUF_SIZE is not set
+-CONFIG_RT_CONSOLE_DEVICE_NAME="uart5"
++# CONFIG_RT_CONSOLE_DEVICE_NAME is not set
+ # end of Kernel Device Object
+ 
+ CONFIG_RT_VER_NUM=0x50002
+@@ -94,22 +94,22 @@
+ CONFIG_RT_MAIN_THREAD_STACK_SIZE=2048
+ CONFIG_RT_MAIN_THREAD_PRIORITY=10
+ # CONFIG_RT_USING_LEGACY is not set
+-CONFIG_RT_USING_MSH=y
++# CONFIG_RT_USING_MSH is not set
+-CONFIG_RT_USING_FINSH=y
++# CONFIG_RT_USING_FINSH is not set
+-CONFIG_FINSH_USING_MSH=y
++# CONFIG_FINSH_USING_MSH is not set
+-CONFIG_FINSH_THREAD_NAME="tshell"
++# CONFIG_FINSH_THREAD_NAME is not set
+-CONFIG_FINSH_THREAD_PRIORITY=20
++# CONFIG_FINSH_THREAD_PRIORITY is not set
+-CONFIG_FINSH_THREAD_STACK_SIZE=4096
++# CONFIG_FINSH_THREAD_STACK_SIZE is not set
+-CONFIG_FINSH_USING_HISTORY=y
++# CONFIG_FINSH_USING_HISTORY is not set
+-CONFIG_FINSH_HISTORY_LINES=5
++# CONFIG_FINSH_HISTORY_LINES is not set
+-CONFIG_FINSH_USING_SYMTAB=y
++# CONFIG_FINSH_USING_SYMTAB is not set
+-CONFIG_FINSH_CMD_SIZE=80
++# CONFIG_FINSH_CMD_SIZE is not set
+-CONFIG_MSH_USING_BUILT_IN_COMMANDS=y
++# CONFIG_MSH_USING_BUILT_IN_COMMANDS is not set
+-CONFIG_FINSH_USING_DESCRIPTION=y
++# CONFIG_FINSH_USING_DESCRIPTION is not set
+ # CONFIG_FINSH_ECHO_DISABLE_DEFAULT is not set
+ # CONFIG_FINSH_USING_AUTH is not set
+-CONFIG_FINSH_ARG_MAX=10
++# CONFIG_FINSH_ARG_MAX is not set
+-CONFIG_FINSH_USING_OPTION_COMPLETION=y
++# CONFIG_FINSH_USING_OPTION_COMPLETION is not set
+ 
+ #
+ # DFS: device virtual file system
+@@ -1426,7 +1426,7 @@
+ CONFIG_BSP_USING_UART=y
+ # CONFIG_BSP_USING_UART1 is not set
+ CONFIG_BSP_USING_UART2=y
+-CONFIG_BSP_USING_UART5=y
++# CONFIG_BSP_USING_UART5 is not set
+ # CONFIG_BSP_USING_RTC is not set
+ # CONFIG_BSP_USING_HYPERAM is not set
+ # CONFIG_BSP_USING_PWM is not set
