@@ -1,0 +1,129 @@
+{
+  "case_vs_electronics": [],
+  "case_vs_screen_reserved": {
+    "Base": {
+      "overlap_mm3": 0.0,
+      "min_gap_mm": 0.09999999999999964
+    },
+    "Lid": {
+      "overlap_mm3": 0.0,
+      "min_gap_mm": 7.789968450154338
+    },
+    "ScreenBezel": {
+      "overlap_mm3": 0.0,
+      "min_gap_mm": 0.5999999999999996
+    }
+  },
+  "case_pairs": [
+    [
+      "Base",
+      "Lid",
+      0.0
+    ],
+    [
+      "Base",
+      "ScreenBezel",
+      0.0
+    ],
+    [
+      "Lid",
+      "ScreenBezel",
+      0.0
+    ]
+  ],
+  "insertion_path": {
+    "method": "discrete sampling, downward offsets 0.5 to 20 mm; continuous sweep not certified",
+    "collisions": []
+  },
+  "cable_envelopes": {
+    "USB_DAP": {
+      "Base": 0.0,
+      "Lid": 0.0,
+      "ScreenBezel": 0.0
+    },
+    "USB_MAIN": {
+      "Base": 0.0,
+      "Lid": 0.0,
+      "ScreenBezel": 0.0
+    },
+    "PMOD1": {
+      "Base": 0.0,
+      "Lid": 0.0,
+      "ScreenBezel": 0.0
+    },
+    "PMOD2": {
+      "Base": 0.0,
+      "Lid": 0.0,
+      "ScreenBezel": 0.0
+    },
+    "GPIO40": {
+      "Base": 0.0,
+      "Lid": 0.0,
+      "ScreenBezel": 0.0
+    },
+    "TF_Card": {
+      "Base": 0.0,
+      "Lid": 0.0,
+      "ScreenBezel": 0.0
+    }
+  },
+  "upper_lid_symmetric_difference_mm3": 0.0,
+  "step": {
+    "valid": true,
+    "solids": 3
+  },
+  "stl": {
+    "Midframe_Print.stl": {
+      "closed": true,
+      "components": 1,
+      "min_z": 0.0
+    },
+    "Lid_Print.stl": {
+      "closed": true,
+      "components": 1,
+      "min_z": 0.0
+    },
+    "Screen_Bezel_Print.stl": {
+      "closed": true,
+      "components": 1,
+      "min_z": 0.0
+    }
+  },
+  "dimensions_mm": {
+    "overall": [
+      119.6,
+      78.6,
+      19.71888
+    ],
+    "screen_reserved": [
+      110,
+      69,
+      5
+    ],
+    "lower_pocket": [
+      111.2,
+      70.2
+    ],
+    "front_window": [
+      98.34,
+      57.86
+    ],
+    "front_soft_pad_gap": 0.6,
+    "upper_pad_gap": 0.3
+  },
+  "hardware": {
+    "upper_lid": "4 x M3x8, unchanged",
+    "lower_bezel": "4 x M2x8, head diameter <=3.8",
+    "lower_screw_thread_engagement_mm": 3.78112,
+    "lower_screw_tip_z": -1.01888,
+    "lower_pilot_end_z": 0.1,
+    "pcb_screws": "none; corner stops plus original PCB/display support structure",
+    "core_hardware": "retain factory mounting; V2 long through-screws removed"
+  },
+  "assumptions": [
+    "Display centered at (55,34.5); measure offset before final printing",
+    "Screen package and original supports have 110x69x5 envelope; screen FPC routing not supplied",
+    "Soft pad nominal compressed gaps are 0.6 front and 0.3 upper; actual pads selected to fit measured stack",
+    "Source references omit many small electrical features; no physical fit test or structural FEA"
+  ]
+}

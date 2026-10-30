@@ -1,0 +1,23 @@
+{
+  "Base": {
+    "valid": true,
+    "solids": 1,
+    "mesh_closed": true,
+    "mesh_components": 1,
+    "volume_mm3": 8348.94295428662
+  },
+  "Lid": {
+    "valid": true,
+    "solids": 1,
+    "mesh_closed": true,
+    "mesh_components": 1,
+    "volume_mm3": 15051.471843749836
+  },
+  "ScreenBezel": {
+    "valid": true,
+    "solids": 1,
+    "mesh_closed": true,
+    "mesh_components": 1,
+    "volume_mm3": 12536.165697260418
+  }
+}

@@ -1,0 +1,119 @@
+"""V3 display enclosure. Open the adjacent FCStd, edit P, then run this macro.
+The supplied V2 lid is preserved exactly. All dimensions in mm.
+Display envelope includes its original supports; it is NOT a solid LCD model.
+"""
+import FreeCAD as App, FreeCADGui as Gui
+import Part, MeshPart, Import, os, json, math
+V=App.Vector
+OUT=os.path.dirname(__file__)
+P=dict(board_bottom=-1.21888, display_stack=5.0, display_clearance_xy=0.6,
+       screen_center_x=55.0, screen_center_y=34.5,
+       visible_width=97.34, visible_height=56.86, aa_width=95.04, aa_height=53.86,
+       window_margin=0.5, front_pad_gap=0.6, upper_pad_gap=0.3,
+       bezel_floor=2.2, lower_seam=-4.0, upper_seam=8.0)
+doc=App.ActiveDocument
+if doc is None or doc.getObject('Lid') is None or 'Display_Optimized_v3' not in doc.FileName.replace('\\','/'):
+    doc=App.openDocument(os.path.join(OUT,'EdgiTalk_Display_Enclosure.FCStd'))
+for name in ['Base','ScreenBezel','DisplayConstruction','DisplayReference','DisplayParameters']:
+    o=doc.getObject(name)
+    if o:
+        if hasattr(o,'Group'):
+            for child in list(o.Group):doc.removeObject(child.Name)
+        doc.removeObject(name)
+doc.CaseConstruction.Label='V2 construction - upper lid retained'
+doc.DesignParameters.Label='Legacy V2 values - upper lid reference only'
+doc.CoreSpacers.Label='Original core spacing reference - retain factory hardware'
+doc.CoreSpacers.Visibility=False
+for o in doc.CoreSpacers.Group:o.Visibility=False
+doc.CoreScrewHeadEnvelope.Visibility=False
+construction=doc.addObject('App::DocumentObjectGroup','DisplayConstruction')
+reference=doc.addObject('App::DocumentObjectGroup','DisplayReference')
+params=doc.addObject('App::FeaturePython','DisplayParameters')
+for k,v in P.items():params.addProperty('App::PropertyLength',k,'Dimensions');setattr(params,k,v)
+params.addProperty('App::PropertyString','Assumptions','Reference')
+params.Assumptions='110x69 footprint; 5 mm total below PCB; centered display assumed; factory screen supports and core hardware retained'
+def rounded(x,y,w,h,r,z,t):
+    s=Part.makeBox(w-2*r,h,t,V(x+r,y,z)).fuse(Part.makeBox(w,h-2*r,t,V(x,y+r,z)))
+    return s.multiFuse([Part.makeCylinder(r,t,V(cx,cy,z)) for cx in (x+r,x+w-r) for cy in (y+r,y+h-r)]).removeSplitter()
+def feat(name,shape,group=construction):
+    o=doc.addObject('Part::Feature',name);o.Shape=shape;group.addObject(o);o.Visibility=False;return o
+def box(name,x,y,z,w,h,t):
+    o=doc.addObject('Part::Box',name);o.Length=w;o.Width=h;o.Height=t;o.Placement.Base=V(x,y,z);construction.addObject(o);o.Visibility=False;return o
+def cyl(name,x,y,z,r,h):
+    o=doc.addObject('Part::Cylinder',name);o.Radius=r;o.Height=h;o.Placement.Base=V(x,y,z);construction.addObject(o);o.Visibility=False;return o
+def capsule(a,b,r,z,h):
+    dx=b[0]-a[0];dy=b[1]-a[1];length=math.hypot(dx,dy)
+    s=Part.makeBox(length,2*r,h,V(0,-r,z));s.rotate(V(0,0,0),V(0,0,1),math.degrees(math.atan2(dy,dx)));s.translate(V(a[0],a[1],0))
+    return s.multiFuse([Part.makeCylinder(r,h,V(x,y,z)) for x,y in (a,b)]).removeSplitter()
+outer=(-4.8,-4.8,119.6,78.6,3.2)
+inner=(-2.6,-2.6,115.2,74.2,1.0)
+pcb_mounts=[(4.,4.),(106.,4.),(4.,65.),(106.,65.)]
+case_mounts=[(-1.6,-1.6),(111.6,-1.6),(-1.6,70.6),(111.6,70.6)]
+lower_mounts=[(x,y) for x in (-2.9,112.9) for y in (10.,59.)]
+locators=[(x,y) for x in (-3.5,113.5) for y in (15.,54.)]
+front=P['board_bottom']-P['display_stack']
+seat=front-P['front_pad_gap'];bottom=seat-P['bezel_floor'];split=P['lower_seam']
+window_w=P['visible_width']+2*P['window_margin'];window_h=P['visible_height']+2*P['window_margin']
+window_x=P['screen_center_x']-window_w/2;window_y=P['screen_center_y']-window_h/2
+c=P['display_clearance_xy']
+shell=rounded(*outer,split,P['upper_seam']-split).cut(rounded(*inner,split-.1,20))
+posts=[Part.makeCylinder(3.2,P['upper_seam']-split,V(x,y,split)) for x,y in case_mounts]
+posts += [Part.makeCylinder(2.3,4.8,V(x,y,split)) for x,y in lower_mounts]
+# Upper corner stops contact only the PCB's empty mounting-hole annuli through 0.3 mm pads.
+# The complete PCB/display assembly inserts from the bottom with the bezel removed.
+stops=[capsule(a,b,3.5,P['upper_pad_gap'],2.2) for a,b in zip(case_mounts,pcb_mounts)]
+blank=shell.multiFuse(posts+stops).common(rounded(*outer,split,12)).removeSplitter()
+baseblank=feat('DisplayMidframeBlank',blank)
+ports=[doc.getObject(n) for n in ['USB_DAP_14x8','USB_MAIN_14x8','KEY_RST_Access','CAN_Cable','PMOD1_Cable','PMOD2_Cable','TF_Card_Access','CAN_PMOD_Thin_Web_Clearance','Audio_Cable','Battery_Cable','Antenna_Cable']]
+cuts=list(ports)
+cuts.append(box('Whole_Display_Clearance',-c,-c,bottom-1,110+2*c,69+2*c,P['board_bottom']+.1-bottom+1))
+for i,(x,y) in enumerate(case_mounts):cuts.append(cyl('V3_Lid_Pilot_'+str(i),x,y,1.5,1.3,8))
+for i,(x,y) in enumerate(pcb_mounts):cuts.append(cyl('Corner_Stop_Hole_'+str(i),x,y,.2,2.2,2.5))
+for i,(x,y) in enumerate(lower_mounts):cuts.append(cyl('Bezel_M2_Pilot_'+str(i),x,y,split-.1,.8,4.2))
+for i,(x,y) in enumerate(locators):cuts.append(cyl('Bezel_Locator_Socket_'+str(i),x,y,split-.1,1.0,1.3))
+tool=doc.addObject('Part::Compound','DisplayMidframeTools');tool.Links=cuts;construction.addObject(tool)
+base=doc.addObject('Part::Cut','Base');base.Label='01 Midframe - display inserts from below';base.Base=baseblank;base.Tool=tool;base.Refine=True
+# Detachable front bezel: broad border carries pads outside the visible area.
+frame=rounded(*outer,bottom,split-bottom)
+frame=frame.cut(Part.makeBox(110+2*c,69+2*c,10,V(-c,-c,seat)))
+frame=frame.cut(Part.makeBox(window_w,window_h,20,V(window_x,window_y,bottom-1)))
+for x,y in lower_mounts:frame=frame.cut(Part.makeCylinder(1.15,10,V(x,y,bottom-.1)))
+frame=frame.multiFuse([Part.makeCylinder(.7,1.05,V(x,y,split-.05)) for x,y in locators]).removeSplitter()
+bezel=doc.addObject('Part::Feature','ScreenBezel');bezel.Label='03 Removable screen bezel - outer face down';bezel.Shape=frame
+# References: reserved stack volume can overlap the source pins because it includes existing internal structures.
+envelope=feat('ScreenStackEnvelope',Part.makeBox(110,69,P['display_stack'],V(0,0,front)),reference)
+envelope.Label='Screen + existing supports: RESERVED envelope, not an LCD solid';envelope.ViewObject.Transparency=85
+glass=feat('ScreenFrontReference',Part.makeBox(110,69,.2,V(0,0,front)),reference)
+glass.Label='Screen front reference - surface position only';glass.ViewObject.ShapeColor=(.06,.07,.08)
+visible=feat('VisibleAreaReference',Part.makeBox(P['visible_width'],P['visible_height'],.02,V(P['screen_center_x']-P['visible_width']/2,P['screen_center_y']-P['visible_height']/2,front-.02)),reference)
+visible.ViewObject.ShapeColor=(.12,.20,.24);visible.Label='Visible area 97.34 x 56.86 - centered assumption'
+aa=feat('ActiveAreaReference',Part.makeBox(P['aa_width'],P['aa_height'],.02,V(P['screen_center_x']-P['aa_width']/2,P['screen_center_y']-P['aa_height']/2,front-.04)),reference)
+aa.ViewObject.ShapeColor=(.10,.43,.56);aa.Label='AA 95.04 x 53.86 - centered assumption'
+padshapes=[Part.makeBox(98,2,P['front_pad_gap'],V(6,y,seat)) for y in (1.5,65.5)]
+padshapes += [Part.makeBox(2,60,P['front_pad_gap'],V(x,4.5,seat)) for x in (1.5,106.5)]
+frontpads=feat('FrontSoftPads',Part.makeCompound(padshapes),reference);frontpads.Label='Soft pads only - nominal compressed 0.6 mm - NOT printed';frontpads.ViewObject.ShapeColor=(.92,.55,.16)
+uppads=feat('UpperSoftPads',Part.makeCompound([Part.makeCylinder(3.4,P['upper_pad_gap'],V(x,y,0)).cut(Part.makeCylinder(2.25,P['upper_pad_gap'],V(x,y,0))) for x,y in pcb_mounts]),reference)
+uppads.Label='Upper insulating pads - 0.3 mm - NOT printed';uppads.ViewObject.ShapeColor=(.92,.55,.16)
+doc.recompute()
+for o in construction.Group:o.Visibility=False
+construction.Visibility=False;doc.CaseConstruction.Visibility=False
+for o in doc.CaseConstruction.Group:o.Visibility=False
+for o in (base,doc.Lid,bezel):o.Visibility=True;o.ViewObject.DisplayMode='Flat Lines'
+base.ViewObject.ShapeColor=(.16,.24,.30);bezel.ViewObject.ShapeColor=(.16,.24,.30)
+for o in reference.Group:o.Visibility=o.Name!='ScreenStackEnvelope'
+reference.Visibility=True
+checks={}
+for ob,filename,flip in [(base,'Midframe_Print.stl',False),(doc.Lid,'Lid_Print.stl',True),(bezel,'Screen_Bezel_Print.stl',False)]:
+    s=ob.Shape.copy()
+    if not s.isValid() or len(s.Solids)!=1:raise RuntimeError(ob.Name+' invalid or disconnected')
+    if flip:s.rotate(V(0,0,0),V(1,0,0),180)
+    b=s.BoundBox;s.translate(V(-b.XMin,-b.YMin,-b.ZMin))
+    mesh=MeshPart.meshFromShape(Shape=s,LinearDeflection=.06,AngularDeflection=.18,Relative=False)
+    mesh.write(os.path.join(OUT,filename))
+    checks[ob.Name]=dict(valid=ob.Shape.isValid(),solids=len(ob.Shape.Solids),mesh_closed=mesh.isSolid(),mesh_components=mesh.countComponents(),volume_mm3=ob.Shape.Volume)
+Import.export([base,doc.Lid,bezel],os.path.join(OUT,'Enclosure_V3.step'))
+open(os.path.join(OUT,'geometry_checks.json'),'w').write(json.dumps(checks,indent=2))
+doc.Label='Edgi-Talk V3 | underside display 5 mm total stack'
+Gui.activeDocument().activeView().viewAxonometric();Gui.activeDocument().activeView().fitAll()
+doc.recompute();doc.save()
+print(json.dumps(dict(parameters=P,screen_front_z=front,bezel_seat_z=seat,external_bottom_z=bottom,overall_height=10.7-bottom,window=[window_w,window_h],geometry=checks),indent=2))
